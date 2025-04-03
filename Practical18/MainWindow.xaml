@@ -1,0 +1,34 @@
+﻿<Window x:Class="Practical18.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Practical18"
+        mc:Ignorable="d"
+        Title="Управление базой данных" Height="450" Width="800">
+    <Grid>
+        <Menu VerticalAlignment="Top">
+            <MenuItem Header="Добавить" Click="Add_Click"/>
+            <MenuItem Header="Изменить" Click="Edit_Click"/>
+            <MenuItem Header="Просмотр" Click="View_Click"/>
+            <MenuItem Header="Удалить" Click="Delete_Click"/>
+            <MenuItem Header="› Запросы ‹">
+                <MenuItem Header="Запросы на выборку">
+                    <MenuItem Header="Выборка рабочих с зарплатой выше 50000" Click="Query1_Click"/>
+                    <MenuItem Header="Выборка всех рабочих мест со стажем более 5 лет" Click="Query2_Click"/>
+                </MenuItem>
+                <MenuItem Header="Запросы на обновление">
+                    <MenuItem Header="Увеличить зарплату всер рабочим на 10%" Click="Query3_Click"/>
+                    <MenuItem Header="Изменить должность у всех рабочих с разрядом 5 на старший мастер" Click="Query4_Click"/>
+                </MenuItem>
+                <MenuItem Header="Запросы на удаление">
+                    <MenuItem Header="Удалить всех рабочих со стажем менее 1 года" Click="Query5_Click"/>
+                </MenuItem>
+            </MenuItem>
+        </Menu>
+        <DataGrid x:Name="dataGrid" AutoGenerateColumns="True" Margin="10,30,10,10"/>
+        <StackPanel HorizontalAlignment="Right" VerticalAlignment="Bottom" Orientation="Horizontal" Margin="10">
+            <Button Content="Обновить данные" Click="RefreshData_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>
