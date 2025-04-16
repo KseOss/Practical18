@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -16,6 +16,7 @@ namespace Practical18
     public partial class MainWindow : Window
     {
         private WorkerDbContext _db;
+        private List<WorkersInfo> _workerChache;
         public MainWindow()
         {
             InitializeComponent();
@@ -67,45 +68,34 @@ namespace Practical18
         private void Delete_Click(object sender, RoutedEventArgs e)
         {
             var selected = dataGrid.SelectedItem as WorkersInfo;
-            if (selected != null)
+            if (selected == null)
             {
                 MessageBox.Show("Выберите запись для удаления");
                 return;
             }
-            try
+
+            if (MessageBox.Show("Вы уверены, что хотите удалить студента?", "Подтверждение", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
-                var workerToDelete = _db.WorkersInfos.FirstOrDefault(w => w.WorkerId == selected.WorkerId);
-                if (workerToDelete != null)
-                {
-                    _db.WorkersInfos.Remove(workerToDelete);
-                    _db.SaveChanges();
-                    LoadData();
-                    MessageBox.Show("Запись  успешно удалена");
-                }
-                else
-                {
-                    MessageBox.Show("Запись не найдена в бд");
-                }
+                _db.WorkersInfos.Remove(selected);
+                _db.SaveChanges();
+                LoadData();
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Failed to delete {ex.Message}");
-            }
-            
-        }
+        }  
         private void RefreshData_Click(object sender, RoutedEventArgs e)
         {
             LoadData();
         }
         private void Query1_Click(object sender, RoutedEventArgs e)
         {
-            var query = _db.WorkersInfos.Where(w => w.SalaryAmount > 50000).ToList();
-            MessageBox.Show($"Найдено {query.Count} рабочих с зарплатой выше 50.000");
+            _workerChache = _db.WorkersInfos.Where(w => w.SalaryAmount > 50000).ToList();
+            MessageBox.Show($"Найдено {_workerChache.Count} рабочих с зарплатой выше 50.000");
+            LoadData();
         }
         private void Query2_Click(object sender, RoutedEventArgs e)
         {
-            var query = _db.WorkersInfos.Where(w => w.Experience > 5).ToList();
-            MessageBox.Show($"Найдено {query.Count} рабочих со стажем более 5 лет");
+            _workerChache = _db.WorkersInfos.Where(w => w.Experience > 5).ToList();
+            MessageBox.Show($"Найдено {_workerChache.Count} раюочих со стажем более 5 лет");
+            LoadData();
         }
         private void Query3_Click(object sender, RoutedEventArgs e)
         {
@@ -113,32 +103,34 @@ namespace Practical18
             {
                 foreach (var worker in _db.WorkersInfos)
                 {
-                    worker.SalaryAmount += 1.10m; //увеличение зп на 10%
+                    worker.SalaryAmount += 1.10m;
                 }
                 _db.SaveChanges();
-                MessageBox.Show("Зарплата всех рабочих успешно увеличена на 10 %");
+                MessageBox.Show("Зарплата всех рабочих увелчена на 10%");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при обновлении данных: {ex.Message}");
+                MessageBox.Show($"Ошибка при обновлении данных {ex.Message}");
             }
+            LoadData();
         }
         private void Query4_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                var workersToUpdate = _db.WorkersInfos.Where(w => w.WorkerRank == 5);
+                var workersToUpdate = _db.WorkersInfos.Where(w => w.WorkerRank == 4);
                 foreach (var worker in workersToUpdate)
                 {
                     worker.Position = "Старший мастер";
                 }
                 _db.SaveChanges();
-                MessageBox.Show("Должность успешно изменена для всех рабочих с разрядом 5.");
+                MessageBox.Show("Должность успешно изменена для всех рабочих с раздрядом 4");
             }
-            catch (Exception ex)
+            catch(Exception ex) 
             {
-                MessageBox.Show($"Ошибка при обновлении данных: {ex.Message}");
+                MessageBox.Show($"Ошибка {ex.Message}");
             }
+            LoadData();
         }
         private void Query5_Click(object sender, RoutedEventArgs e)
         {
@@ -151,8 +143,9 @@ namespace Practical18
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при удалении данных: {ex.Message}");
+                MessageBox.Show($"Ошибка {ex.Message}");
             }
+            LoadData();
         }
     }
 }
