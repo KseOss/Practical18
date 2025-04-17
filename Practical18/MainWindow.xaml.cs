@@ -100,13 +100,21 @@ namespace Practical18
         }
         private void Query1_Click(object sender, RoutedEventArgs e)
         {
-            _workerChache = _db.WorkersInfos.Where(w => w.SalaryAmount > 50000).ToList();
+            //_workerChache = _db.WorkersInfos.Where(w => w.SalaryAmount > 50000).ToList();
+            var query = from worker in _db.WorkersInfos
+                        where worker.SalaryAmount > 50000
+                        select worker;
+            _workerChache = query.ToList();
             dataGrid.ItemsSource = _workerChache;
             MessageBox.Show($"Найдено {_workerChache.Count} рабочих с зарплатой выше 50.000");
         }
         private void Query2_Click(object sender, RoutedEventArgs e)
         {
-            _workerChache = _db.WorkersInfos.Where(w => w.Experience > 5).ToList();
+            //_workerChache = _db.WorkersInfos.Where(w => w.Experience > 5).ToList();
+            var query = from worker in _db.WorkersInfos
+                        where worker.Experience > 5
+                        select worker;
+            _workerChache = query.ToList();
             dataGrid.ItemsSource = _workerChache;
             MessageBox.Show($"Найдено {_workerChache.Count} раюочих со стажем более 5 лет");
         }
@@ -114,6 +122,8 @@ namespace Practical18
         {
             try
             {
+                var workers = from worker in _db.WorkersInfos
+                              select worker;
                 foreach (var worker in _db.WorkersInfos)
                 {
                     worker.SalaryAmount = Math.Round(worker.SalaryAmount * 1.10m, 2);
@@ -131,10 +141,13 @@ namespace Practical18
         {
             try
             {
-                var workersToUpdate = _db.WorkersInfos.Where(w => w.WorkerRank == 4);
+                //var workersToUpdate = _db.WorkersInfos.Where(w => w.WorkerRank == 4);
+                var workersToUpdate = from worker in _db.WorkersInfos
+                                      where worker.WorkerRank == 4
+                                      select worker;
                 foreach (var worker in workersToUpdate)
                 {
-                    worker.Position = "Старший мастер";
+                    worker.Position = "Дальше некуда)";
                 }
                 _db.SaveChanges();
                 LoadData();
@@ -149,11 +162,14 @@ namespace Practical18
         {
             try
             {
-                var workersToDelete = _db.WorkersInfos.Where(w => w.Experience < 1).ToList();
+                //var workersToDelete = _db.WorkersInfos.Where(w => w.Experience < 1).ToList();
+                var workersToDelete = from worker in _db.WorkersInfos
+                                      where worker.Experience < 1
+                                      select worker;
                 _db.WorkersInfos.RemoveRange(workersToDelete);
                 _db.SaveChanges();
                 LoadData();
-                MessageBox.Show($"Удалено {workersToDelete.Count} рабочих со стажем менее 1 года");
+                MessageBox.Show($"Удалено {workersToDelete.Count()} рабочих со стажем менее 1 года");
             }
             catch (Exception ex)
             {
