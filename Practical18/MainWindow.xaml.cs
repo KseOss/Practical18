@@ -10,6 +10,8 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Practical18.Models;
 using System.Linq;
+using Microsoft.EntityFrameworkCore.Update;
+using Microsoft.Data.SqlClient;
 
 namespace Practical18
 {
@@ -29,16 +31,17 @@ namespace Practical18
         }
         private void Add_Click(object sender, RoutedEventArgs e)
         {
-            var addWindow = new AddEditWindow(new WorkersInfo(), _db);
-            if (addWindow.ShowDialog() == true)
-            {
-                LoadData();
-            }
+                var addWindow = new AddEditWindow(new WorkersInfo(), _db);
+                if (addWindow.ShowDialog() == true)
+                {
+                    _db.SaveChanges();
+                    LoadData();
+                }
         }
         private void Edit_Click(object sender, RoutedEventArgs e)
         {
             var selected = dataGrid.SelectedItem as WorkersInfo;
-            if (selected != null)
+            if (selected == null)
             {
                 MessageBox.Show("Выберите запись для редактирования");
                 return;
@@ -46,24 +49,25 @@ namespace Practical18
             var editWindow = new AddEditWindow(selected, _db);
             if (editWindow.ShowDialog() == true)
             {
+                _db.SaveChanges();
                 LoadData();
             }
         }
         private void View_Click(object sender, RoutedEventArgs e)
         {
             var selected = dataGrid.SelectedItem as WorkersInfo;
-            if (selected != null)
+            if (selected == null)
             {
                 MessageBox.Show("Выберите запись для просмотра.");
                 return;
             }
-                MessageBox.Show($"ФИО: {selected.LastName} {selected.FirstName} {selected.MiddleName}\n" +
+            MessageBox.Show($"ФИО: {selected.LastName} {selected.FirstName} {selected.MiddleName}\n" +
                 $"Цех: {selected.DepartmentName}\n" +
                 $"Дата поступления: {selected.HireDate}\n" +
                 $"Размер ЗП: {selected.SalaryAmount}\n" +
                 $"Стаж работы: {selected.Experience}\n" +
                 $"Разряд: {selected.WorkerRank}\n" +
-                $"Должность: {selected.Position}\n");
+                $"Должность: {selected.Position}");
         }
         private void Delete_Click(object sender, RoutedEventArgs e)
         {
@@ -78,6 +82,15 @@ namespace Practical18
             {
                 _db.WorkersInfos.Remove(selected);
                 _db.SaveChanges();
+                //Код где при удалении сбрасывается айди
+                using (var connection = new SqlConnection("Server=localhost\\sqlexpress;Database=WorkerDB;User=исп-34;Password=1234567890;Encrypt=false"))
+                {
+                    connection.Open();
+                    using (var command = new SqlCommand("DBCC CHECKIDENT(WorkersInfo, RESEED, 0)", connection))
+                    {
+                        command.ExecuteNonQuery();
+                    }
+                }
                 LoadData();
             }
         }  
@@ -88,14 +101,14 @@ namespace Practical18
         private void Query1_Click(object sender, RoutedEventArgs e)
         {
             _workerChache = _db.WorkersInfos.Where(w => w.SalaryAmount > 50000).ToList();
+            dataGrid.ItemsSource = _workerChache;
             MessageBox.Show($"Найдено {_workerChache.Count} рабочих с зарплатой выше 50.000");
-            LoadData();
         }
         private void Query2_Click(object sender, RoutedEventArgs e)
         {
             _workerChache = _db.WorkersInfos.Where(w => w.Experience > 5).ToList();
+            dataGrid.ItemsSource = _workerChache;
             MessageBox.Show($"Найдено {_workerChache.Count} раюочих со стажем более 5 лет");
-            LoadData();
         }
         private void Query3_Click(object sender, RoutedEventArgs e)
         {
@@ -103,16 +116,16 @@ namespace Practical18
             {
                 foreach (var worker in _db.WorkersInfos)
                 {
-                    worker.SalaryAmount += 1.10m;
+                    worker.SalaryAmount = Math.Round(worker.SalaryAmount * 1.10m, 2);
                 }
                 _db.SaveChanges();
-                MessageBox.Show("Зарплата всех рабочих увелчена на 10%");
+                LoadData();
+                MessageBox.Show("Зарплата всех рабочих увеличена на 10%");
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Ошибка при обновлении данных {ex.Message}");
             }
-            LoadData();
         }
         private void Query4_Click(object sender, RoutedEventArgs e)
         {
@@ -124,13 +137,13 @@ namespace Practical18
                     worker.Position = "Старший мастер";
                 }
                 _db.SaveChanges();
-                MessageBox.Show("Должность успешно изменена для всех рабочих с раздрядом 4");
+                LoadData();
+                MessageBox.Show("Должность успешно изменена для всех рабочих с разрядом 4");
             }
-            catch(Exception ex) 
+            catch (Exception ex)
             {
                 MessageBox.Show($"Ошибка {ex.Message}");
             }
-            LoadData();
         }
         private void Query5_Click(object sender, RoutedEventArgs e)
         {
@@ -139,13 +152,13 @@ namespace Practical18
                 var workersToDelete = _db.WorkersInfos.Where(w => w.Experience < 1).ToList();
                 _db.WorkersInfos.RemoveRange(workersToDelete);
                 _db.SaveChanges();
+                LoadData();
                 MessageBox.Show($"Удалено {workersToDelete.Count} рабочих со стажем менее 1 года");
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Ошибка {ex.Message}");
             }
-            LoadData();
         }
     }
 }
