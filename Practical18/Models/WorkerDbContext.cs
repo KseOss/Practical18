@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,15 +23,17 @@ public partial class WorkerDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        
         modelBuilder.Entity<WorkersInfo>(entity =>
         {
+            
             entity.HasKey(e => e.WorkerId).HasName("PK__WorkersI__077C8806924FB498");
 
             entity.ToTable("WorkersInfo");
 
             entity.Property(e => e.WorkerId)
-                .ValueGeneratedNever()
-                .HasColumnName("WorkerID");
+            .ValueGeneratedOnAdd()
+            .HasColumnName("WorkerID");
             entity.Property(e => e.DepartmentName).HasMaxLength(100);
             entity.Property(e => e.FirstName).HasMaxLength(50);
             entity.Property(e => e.LastName).HasMaxLength(50);
