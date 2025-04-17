@@ -1,4 +1,4 @@
-﻿using Practical18.Models;
+using Practical18.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 
 namespace Practical18
 {
@@ -40,22 +41,25 @@ namespace Practical18
         {
             try
             {
-   
-
                 _worker.LastName = txtLastName.Text;
                 _worker.FirstName = txtFirstName.Text;
                 _worker.MiddleName = txtMiddlename.Text;
                 _worker.DepartmentName = txtDepartament.Text;
-                _worker.HireDate = DateOnly.FromDateTime(dpHireDate.SelectedDate.Value);
+                _worker.HireDate = DateOnly.FromDateTime(dpHireDate.SelectedDate ?? DateTime.Now); // Добавлена проверка на null
                 _worker.SalaryAmount = decimal.Parse(txtSalary.Text);
                 _worker.Experience = int.Parse(txtExperience.Text);
                 _worker.WorkerRank = int.Parse(txtRank.Text);
                 _worker.Position = txtPosition.Text;
 
-                if(_worker.WorkerId == 0)
+                if (_worker.WorkerId == 0)
                 {
                     _db.WorkersInfos.Add(_worker);
                 }
+                else
+                {
+                    _db.Entry(_worker).State = EntityState.Modified; // Добавлено обновление существующей записи
+                }
+
                 _db.SaveChanges();
                 DialogResult = true;
                 Close();
